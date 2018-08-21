@@ -11,7 +11,7 @@ try:
     asyncio.ensure_future
 except AttributeError:
     # pylint: disable=no-member
-    asyncio.ensure_future = asyncio.async
+    asyncio.ensure_future = asyncio.ensure_future
 
 parser = argparse.ArgumentParser(
     description='low-level qubesd interrogation tool')

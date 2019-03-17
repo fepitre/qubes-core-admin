@@ -55,7 +55,7 @@ Main public classes
 Helper classes and functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: qubes.vm.Features
+.. autoclass:: qubes.features.Features
    :members:
    :show-inheritance:
 

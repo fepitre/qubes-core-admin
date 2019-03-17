@@ -50,6 +50,7 @@ BuildRequires:  systemd
 BuildRequires:  gcc
 
 BuildRequires:  python3-devel
+BuildRequires:  python3-xen
 
 # for building documentation
 BuildRequires:	python3-sphinx

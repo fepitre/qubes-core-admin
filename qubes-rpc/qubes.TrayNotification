@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+import gi
+import sys
+import os
+import re
+import logging
+import textwrap
+
+gi.require_version('Notify', '0.7')
+from gi.repository import Notify
+
+
+def filter_items(untrusted_str):
+    # filter html tags
+    valid_str = re.sub('<.*?>', '', untrusted_str)
+    # drop special chars
+    valid_str = re.sub(r'[^a-zA-Z0-9\s.,]+', '_', valid_str)
+    return valid_str
+
+
+def displayable_text(trusted_str, str_len):
+    wrapper = textwrap.TextWrapper(width=int(str_len / 2))
+    trimmed_text = re.sub(r'[ \t]+', " ", trusted_str.strip())
+    if len(trimmed_text) > str_len:
+        short_str = textwrap.shorten(text=trimmed_text, width=str_len)
+        wrapped_text = wrapper.fill(text=short_str)
+    else:
+        wrapped_text = wrapper.fill(text=trimmed_text)
+    return wrapped_text
+
+
+def split_items(untrusted_items):
+    # split header to get size of app_name and summary
+    list_items = untrusted_items.split('\n', 1)
+    try:
+        app_len, summary_len = map(int, list_items[0].split(' '))
+    except ValueError:
+        logging.exception("An error occurred while splitting header items")
+    # split and filter components
+    end_summary = app_len + summary_len + 2
+    app_name = filter_items(list_items[1][1:app_len + 1])
+    summary = filter_items(list_items[1][app_len + 2:end_summary])
+    body = filter_items(list_items[1][end_summary + 1:])
+    # display max 60 chars in summary and 120 in body
+    wrapped_summary = displayable_text(summary, 60)
+    wrapped_body = displayable_text(body, 120)
+    return app_name, wrapped_summary, wrapped_body
+
+
+def main():
+    os.environ.setdefault('DISPLAY', ':0.0')
+    env_vmname = os.environ.get("QREXEC_REMOTE_DOMAIN")
+    # get items from remote vm
+    data = sys.stdin.read()
+    app_name, default_summary, body = split_items(data)
+    appname_summary = "{} - {} : {}".format(env_vmname, app_name, default_summary)
+    Notify.init(app_name)
+    if body:
+        Notify.Notification.new(
+            appname_summary,
+            body
+        ).show()
+    else:
+        Notify.Notification.new(appname_summary).show()
+
+
+if __name__ == '__main__':
+    main()

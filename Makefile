@@ -191,6 +191,7 @@ endif
 	cp qubes-rpc-policy/qubes.UpdatesProxy.policy $(DESTDIR)/etc/qubes-rpc/policy/qubes.UpdatesProxy
 	cp qubes-rpc-policy/qubes.GetDate.policy $(DESTDIR)/etc/qubes-rpc/policy/qubes.GetDate
 	cp qubes-rpc-policy/qubes.ConnectTCP.policy $(DESTDIR)/etc/qubes-rpc/policy/qubes.ConnectTCP
+	cp qubes-rpc-policy/qubes.TrayNotification.policy $(DESTDIR)/etc/qubes-rpc/policy/qubes.TrayNotification
 	cp qubes-rpc-policy/admin.vm.Console.policy $(DESTDIR)/etc/qubes-rpc/policy/admin.vm.Console
 	cp qubes-rpc-policy/admin.vm.volume.Import.policy $(DESTDIR)/etc/qubes-rpc/policy/admin.vm.volume.Import
 	cp qubes-rpc-policy/admin.vm.volume.ImportWithSize.policy $(DESTDIR)/etc/qubes-rpc/policy/admin.vm.volume.ImportWithSize

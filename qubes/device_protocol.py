@@ -40,7 +40,7 @@ import qubes.utils
 
 from qubes.exc import ProtocolError
 
-QubesVM = "qubes.vm.BaseVM"
+QubesVM = "qubes.vm.LocalVM"
 
 
 class UnexpectedDeviceProperty(qubes.exc.QubesException, ValueError):

@@ -202,7 +202,7 @@ class BlockDevice(qubes.device_protocol.DeviceInfo):
         return self._parent
 
     @property
-    def attachment(self) -> Optional["qubes.vm.BaseVM"]:
+    def attachment(self) -> Optional["qubes.vm.LocalVM"]:
         """
         Warning: this property is time-consuming, do not run in loop!
         """

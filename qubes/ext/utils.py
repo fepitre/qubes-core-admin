@@ -24,33 +24,41 @@ import qubes
 
 
 def device_list_change(
-        ext: qubes.ext.Extension, current_devices,
-        vm, path, device_class: qubes.device_protocol.DeviceInfo
+    ext: qubes.ext.Extension,
+    current_devices,
+    vm,
+    path,
+    device_class: qubes.device_protocol.DeviceInfo,
 ):
-    devclass = device_class.__name__[:-len('Device')].lower()
+    devclass = device_class.__name__[: -len("Device")].lower()
 
     if path is not None:
-        vm.fire_event(f'device-list-change:{devclass}')
+        vm.fire_event(f"device-list-change:{devclass}")
 
-    added, attached, detached, removed = (
-        compare_device_cache(vm, ext.devices_cache, current_devices))
+    added, attached, detached, removed = compare_device_cache(
+        vm, ext.devices_cache, current_devices
+    )
 
     # send events about devices detached/attached outside by themselves
     for dev_id, front_vm in detached.items():
         dev = device_class(vm, dev_id)
-        asyncio.ensure_future(front_vm.fire_event_async(
-            f'device-detach:{devclass}', device=dev))
+        asyncio.ensure_future(
+            front_vm.fire_event_async(f"device-detach:{devclass}", device=dev)
+        )
     for dev_id in removed:
         device = device_class(vm, dev_id)
-        vm.fire_event(f'device-removed:{devclass}', device=device)
+        vm.fire_event(f"device-removed:{devclass}", device=device)
     for dev_id in added:
         device = device_class(vm, dev_id)
-        vm.fire_event(f'device-added:{devclass}', device=device)
+        vm.fire_event(f"device-added:{devclass}", device=device)
     for dev_ident, front_vm in attached.items():
         dev = device_class(vm, dev_ident)
         # options are unknown, device already attached
-        asyncio.ensure_future(front_vm.fire_event_async(
-            f'device-attach:{devclass}', device=dev, options={}))
+        asyncio.ensure_future(
+            front_vm.fire_event_async(
+                f"device-attach:{devclass}", device=dev, options={}
+            )
+        )
 
     ext.devices_cache[vm.name] = current_devices
 
@@ -58,12 +66,16 @@ def device_list_change(
         if not front_vm.is_running():
             continue
         for assignment in front_vm.devices[devclass].get_assigned_devices():
-            if (assignment.backend_domain == vm
-                    and assignment.ident in added
-                    and assignment.ident not in attached
+            if (
+                assignment.backend_domain == vm
+                and assignment.ident in added
+                and assignment.ident not in attached
             ):
-                asyncio.ensure_future(ext.attach_and_notify(
-                    front_vm, assignment.device, assignment.options))
+                asyncio.ensure_future(
+                    ext.attach_and_notify(
+                        front_vm, assignment.device, assignment.options
+                    )
+                )
 
 
 def compare_device_cache(vm, devices_cache, current_devices):

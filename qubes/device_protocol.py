@@ -40,7 +40,7 @@ import qubes.utils
 
 from qubes.exc import ProtocolError
 
-QubesVM = 'qubes.vm.BaseVM'
+QubesVM = "qubes.vm.BaseVM"
 
 
 class UnexpectedDeviceProperty(qubes.exc.QubesException, ValueError):
@@ -64,10 +64,11 @@ class Device:
             the backend domain.
         devclass (str, optional): The class of the device (e.g., 'usb', 'pci').
     """
+
     ALLOWED_CHARS_KEY = set(
-            string.digits + string.ascii_letters
-            + r"!#$%&()*+,-./:;<>?@[\]^_{|}~")
-    ALLOWED_CHARS_PARAM = ALLOWED_CHARS_KEY.union(set(string.punctuation + ' '))
+        string.digits + string.ascii_letters + r"!#$%&()*+,-./:;<>?@[\]^_{|}~"
+    )
+    ALLOWED_CHARS_PARAM = ALLOWED_CHARS_KEY.union(set(string.punctuation + " "))
 
     def __init__(self, backend_domain, ident, devclass=None):
         self.__backend_domain = backend_domain
@@ -80,24 +81,30 @@ class Device:
     def __eq__(self, other):
         if isinstance(other, Device):
             return (
-                self.backend_domain == other.backend_domain and
-                self.ident == other.ident
+                self.backend_domain == other.backend_domain
+                and self.ident == other.ident
             )
-        raise TypeError(f"Comparing instances of 'Device' and '{type(other)}' "
-                        "is not supported")
+        raise TypeError(
+            f"Comparing instances of 'Device' and '{type(other)}' "
+            "is not supported"
+        )
 
     def __lt__(self, other):
         if isinstance(other, Device):
-            return (self.backend_domain.name, self.ident) < \
-                   (other.backend_domain.name, other.ident)
-        raise TypeError(f"Comparing instances of 'Device' and '{type(other)}' "
-                        "is not supported")
+            return (self.backend_domain.name, self.ident) < (
+                other.backend_domain.name,
+                other.ident,
+            )
+        raise TypeError(
+            f"Comparing instances of 'Device' and '{type(other)}' "
+            "is not supported"
+        )
 
     def __repr__(self):
         return "[%s]:%s" % (self.backend_domain, self.ident)
 
     def __str__(self):
-        return '{!s}:{!s}'.format(self.backend_domain, self.ident)
+        return "{!s}:{!s}".format(self.backend_domain, self.ident)
 
     @property
     def ident(self) -> str:
@@ -110,12 +117,12 @@ class Device:
 
     @property
     def backend_domain(self) -> QubesVM:
-        """ Which domain provides this device. (immutable)"""
+        """Which domain provides this device. (immutable)"""
         return self.__backend_domain
 
     @property
     def devclass(self) -> str:
-        """ Immutable* Device class such like: 'usb', 'pci' etc.
+        """Immutable* Device class such like: 'usb', 'pci' etc.
 
         For unknown devices "peripheral" is returned.
 
@@ -134,7 +141,7 @@ class Device:
 
     @devclass.setter
     def devclass(self, devclass: str):
-        """ Once a value is set, it should not be overridden.
+        """Once a value is set, it should not be overridden.
 
         However, if it has not been set, i.e., the value is `None`,
         we can override it."""
@@ -144,7 +151,7 @@ class Device:
 
     @classmethod
     def unpack_properties(
-            cls, untrusted_serialization: bytes
+        cls, untrusted_serialization: bytes
     ) -> Tuple[Dict, Dict]:
         """
         Unpacks basic device properties from a serialized encoded string.
@@ -158,7 +165,8 @@ class Device:
                 names or values.
         """
         ut_decoded = untrusted_serialization.decode(
-            'ascii', errors='strict').strip()
+            "ascii", errors="strict"
+        ).strip()
 
         properties = {}
         options = {}
@@ -171,24 +179,32 @@ class Device:
         ut_key, _, ut_rest = ut_decoded.partition("='")
 
         key = sanitize_str(
-            ut_key, cls.ALLOWED_CHARS_KEY,
-            error_message='Invalid chars in property name: ')
+            ut_key,
+            cls.ALLOWED_CHARS_KEY,
+            error_message="Invalid chars in property name: ",
+        )
         keys.append(key)
         while "='" in ut_rest:
             ut_value_key, _, ut_rest = ut_rest.partition("='")
             ut_value, _, ut_key = ut_value_key.rpartition("' ")
             value = sanitize_str(
-                deserialize_str(ut_value), cls.ALLOWED_CHARS_PARAM,
-                error_message='Invalid chars in property value: ')
+                deserialize_str(ut_value),
+                cls.ALLOWED_CHARS_PARAM,
+                error_message="Invalid chars in property value: ",
+            )
             values.append(value)
             key = sanitize_str(
-                ut_key, cls.ALLOWED_CHARS_KEY,
-                error_message='Invalid chars in property name: ')
+                ut_key,
+                cls.ALLOWED_CHARS_KEY,
+                error_message="Invalid chars in property name: ",
+            )
             keys.append(key)
         ut_value = ut_rest[:-1]  # ending '
         value = sanitize_str(
-            deserialize_str(ut_value), cls.ALLOWED_CHARS_PARAM,
-            error_message='Invalid chars in property value: ')
+            deserialize_str(ut_value),
+            cls.ALLOWED_CHARS_PARAM,
+            error_message="Invalid chars in property value: ",
+        )
         values.append(value)
 
         for key, value in zip(keys, values):
@@ -206,16 +222,21 @@ class Device:
         Add property `key=value` to serialization.
         """
         key = sanitize_str(
-            key, cls.ALLOWED_CHARS_KEY,
-            error_message='Invalid chars in property name: ')
+            key,
+            cls.ALLOWED_CHARS_KEY,
+            error_message="Invalid chars in property name: ",
+        )
         value = sanitize_str(
-            serialize_str(value), cls.ALLOWED_CHARS_PARAM,
-            error_message='Invalid chars in property value: ')
-        return key.encode('ascii') + b'=' + value.encode('ascii')
+            serialize_str(value),
+            cls.ALLOWED_CHARS_PARAM,
+            error_message="Invalid chars in property value: ",
+        )
+        return key.encode("ascii") + b"=" + value.encode("ascii")
 
     @staticmethod
     def check_device_properties(
-            expected_device: 'Device', properties: Dict[str, Any]):
+        expected_device: "Device", properties: Dict[str, Any]
+    ):
         """
         Validates properties against an expected device configuration.
 
@@ -227,25 +248,30 @@ class Device:
         """
         expected = expected_device
         exp_vm_name = expected.backend_domain.name
-        if properties.get('backend_domain', exp_vm_name) != exp_vm_name:
+        if properties.get("backend_domain", exp_vm_name) != exp_vm_name:
             raise UnexpectedDeviceProperty(
                 f"Got device exposed by {properties['backend_domain']}"
-                f"when expected devices from {exp_vm_name}.")
-        properties['backend_domain'] = expected.backend_domain
+                f"when expected devices from {exp_vm_name}."
+            )
+        properties["backend_domain"] = expected.backend_domain
 
-        if properties.get('ident', expected.ident) != expected.ident:
+        if properties.get("ident", expected.ident) != expected.ident:
             raise UnexpectedDeviceProperty(
                 f"Got device with id: {properties['ident']} "
-                f"when expected id: {expected.ident}.")
-        properties['ident'] = expected.ident
+                f"when expected id: {expected.ident}."
+            )
+        properties["ident"] = expected.ident
 
         if expected.devclass_is_set:
-            if (properties.get('devclass', expected.devclass)
-                    != expected.devclass):
+            if (
+                properties.get("devclass", expected.devclass)
+                != expected.devclass
+            ):
                 raise UnexpectedDeviceProperty(
                     f"Got {properties['devclass']} device "
-                    f"when expected {expected.devclass}.")
-            properties['devclass'] = expected.devclass
+                    f"when expected {expected.devclass}."
+                )
+            properties["devclass"] = expected.devclass
 
 
 class DeviceCategory(Enum):
@@ -255,6 +281,7 @@ class DeviceCategory(Enum):
     Arbitrarily selected interfaces that are important to users,
     thus deserving special recognition such as a custom icon, etc.
     """
+
     # pylint: disable=invalid-name
     Other = "*******"
 
@@ -266,8 +293,14 @@ class DeviceCategory(Enum):
     Scanner = ("p0903**",)
     # Multimedia = Audio, Video, Displays etc.
     Microphone = ("m******",)
-    Multimedia = ("u01****", "u0e****", "u06****", "u10****", "p03****",
-                  "p04****")
+    Multimedia = (
+        "u01****",
+        "u0e****",
+        "u06****",
+        "u10****",
+        "p03****",
+        "p04****",
+    )
     Wireless = ("ue0****", "p0d****")
     Bluetooth = ("ue00101", "p0d11**")
     Mass_Data = ("b******", "u08****", "p01****")
@@ -280,7 +313,7 @@ class DeviceCategory(Enum):
     PCI_USB = ("p0c03**",)
 
     @staticmethod
-    def from_str(interface_encoding: str) -> 'DeviceCategory':
+    def from_str(interface_encoding: str) -> "DeviceCategory":
         """
         Returns `DeviceCategory` from data encoded in string.
         """
@@ -312,29 +345,33 @@ class DeviceInterface:
     """
 
     def __init__(self, interface_encoding: str, devclass: Optional[str] = None):
-        ifc_padded = interface_encoding.ljust(6, '*')
+        ifc_padded = interface_encoding.ljust(6, "*")
         if devclass:
             if len(ifc_padded) > 6:
                 print(
                     f"{interface_encoding=} is too long "
                     f"(is {len(interface_encoding)}, expected max. 6) "
                     f"for given {devclass=}",
-                    file=sys.stderr
+                    file=sys.stderr,
                 )
             ifc_full = devclass[0] + ifc_padded
         else:
             known_devclasses = {
-                'p': 'pci', 'u': 'usb', 'b': 'block', 'm': 'mic'}
+                "p": "pci",
+                "u": "usb",
+                "b": "block",
+                "m": "mic",
+            }
             devclass = known_devclasses.get(interface_encoding[0], None)
             if len(ifc_padded) > 7:
                 print(
                     f"{interface_encoding=} is too long "
                     f"(is {len(interface_encoding)}, expected max. 7)",
-                    file=sys.stderr
+                    file=sys.stderr,
                 )
                 ifc_full = ifc_padded
             elif len(ifc_padded) == 6:
-                ifc_full = '?' + ifc_padded
+                ifc_full = "?" + ifc_padded
             else:
                 ifc_full = ifc_padded
 
@@ -344,17 +381,17 @@ class DeviceInterface:
 
     @property
     def devclass(self) -> Optional[str]:
-        """ Immutable Device class such like: 'usb', 'pci' etc. """
+        """Immutable Device class such like: 'usb', 'pci' etc."""
         return self._devclass
 
     @property
     def category(self) -> DeviceCategory:
-        """ Immutable Device category such like: 'Mouse', 'Mass_Data' etc. """
+        """Immutable Device category such like: 'Mouse', 'Mass_Data' etc."""
         return self._category
 
     @classmethod
-    def unknown(cls) -> 'DeviceInterface':
-        """ Value for unknown device interface. """
+    def unknown(cls) -> "DeviceInterface":
+        """Value for unknown device interface."""
         return cls("?******")
 
     def __repr__(self):
@@ -374,21 +411,32 @@ class DeviceInterface:
         if self.devclass in ("usb", "pci"):
             # try subclass first as in `lspci`
             result = self._load_classes(self.devclass).get(
-                self._interface_encoding[1:-2] + '**', None)
-            if (result is None or result.lower()
-                    in ('none', 'no subclass', 'unused', 'undefined')):
+                self._interface_encoding[1:-2] + "**", None
+            )
+            if result is None or result.lower() in (
+                "none",
+                "no subclass",
+                "unused",
+                "undefined",
+            ):
                 # if not, try interface
                 result = self._load_classes(self.devclass).get(
-                    self._interface_encoding[1:], None)
-            if (result is None or result.lower()
-                    in ('none', 'no subclass', 'unused', 'undefined')):
+                    self._interface_encoding[1:], None
+                )
+            if result is None or result.lower() in (
+                "none",
+                "no subclass",
+                "unused",
+                "undefined",
+            ):
                 # if not, try class
                 result = self._load_classes(self.devclass).get(
-                    self._interface_encoding[1:-4] + '****', None)
+                    self._interface_encoding[1:-4] + "****", None
+                )
             if result is None:
                 result = f"Unclassified {self.devclass} device"
             return result
-        if self.devclass == 'mic':
+        if self.devclass == "mic":
             return "Microphone"
         return repr(self)
 
@@ -402,51 +450,53 @@ class DeviceInterface:
         #       subclass        subclass_name           <-- single tab
         #               prog-if  prog-if_name   <-- two tabs
         result = {}
-        with open(f'/usr/share/hwdata/{bus}.ids',
-                  encoding='utf-8', errors='ignore') as pciids:
+        with open(
+            f"/usr/share/hwdata/{bus}.ids", encoding="utf-8", errors="ignore"
+        ) as pciids:
             # for `class_name` and `subclass_name`
             # pylint: disable=used-before-assignment
             class_id = None
             subclass_id = None
             for line in pciids.readlines():
                 line = line.rstrip()
-                if line.startswith('\t\t') \
-                        and class_id is not None and subclass_id is not None:
-                    (progif_id, _, progif_name) = line[2:].split(' ', 2)
-                    result[class_id + subclass_id + progif_id] = \
-                        progif_name
-                elif line.startswith('\t') and class_id:
-                    (subclass_id, _, subclass_name) = line[1:].split(' ', 2)
+                if (
+                    line.startswith("\t\t")
+                    and class_id is not None
+                    and subclass_id is not None
+                ):
+                    (progif_id, _, progif_name) = line[2:].split(" ", 2)
+                    result[class_id + subclass_id + progif_id] = progif_name
+                elif line.startswith("\t") and class_id:
+                    (subclass_id, _, subclass_name) = line[1:].split(" ", 2)
                     # store both prog-if specific entry and generic one
-                    result[class_id + subclass_id + '**'] = \
-                        subclass_name
-                elif line.startswith('C '):
-                    (_, class_id, _, class_name) = line.split(' ', 3)
-                    result[class_id + '****'] = class_name
+                    result[class_id + subclass_id + "**"] = subclass_name
+                elif line.startswith("C "):
+                    (_, class_id, _, class_name) = line.split(" ", 3)
+                    result[class_id + "****"] = class_name
                     subclass_id = None
 
         return result
 
 
 class DeviceInfo(Device):
-    """ Holds all information about a device """
+    """Holds all information about a device"""
 
     def __init__(
-            self,
-            backend_domain: QubesVM,
-            ident: str,
-            *,
-            devclass: Optional[str] = None,
-            vendor: Optional[str] = None,
-            product: Optional[str] = None,
-            manufacturer: Optional[str] = None,
-            name: Optional[str] = None,
-            serial: Optional[str] = None,
-            interfaces: Optional[List[DeviceInterface]] = None,
-            parent: Optional[Device] = None,
-            attachment: Optional[QubesVM] = None,
-            self_identity: Optional[str] = None,
-            **kwargs
+        self,
+        backend_domain: QubesVM,
+        ident: str,
+        *,
+        devclass: Optional[str] = None,
+        vendor: Optional[str] = None,
+        product: Optional[str] = None,
+        manufacturer: Optional[str] = None,
+        name: Optional[str] = None,
+        serial: Optional[str] = None,
+        interfaces: Optional[List[DeviceInterface]] = None,
+        parent: Optional[Device] = None,
+        attachment: Optional[QubesVM] = None,
+        self_identity: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(backend_domain, ident, devclass)
 
@@ -580,15 +630,18 @@ class DeviceInfo(Device):
         return self._parent
 
     @property
-    def subdevices(self) -> List['DeviceInfo']:
+    def subdevices(self) -> List["DeviceInfo"]:
         """
         The list of children devices if any.
 
         If the device has subdevices (e.g., partitions of a USB stick),
         the subdevices id should be here.
         """
-        return [dev for dev in self.backend_domain.devices[self.devclass]
-                if dev.parent_device.ident == self.ident]
+        return [
+            dev
+            for dev in self.backend_domain.devices[self.devclass]
+            if dev.parent_device.ident == self.ident
+        ]
 
     @property
     def attachment(self) -> Optional[QubesVM]:
@@ -604,47 +657,58 @@ class DeviceInfo(Device):
         # 'backend_domain', 'attachment', 'interfaces', 'data', 'parent_device'
         # are not string, so they need special treatment
         default_attrs = {
-            'ident', 'devclass', 'vendor', 'product', 'manufacturer', 'name',
-            'serial', 'self_identity'}
-        properties = b' '.join(
+            "ident",
+            "devclass",
+            "vendor",
+            "product",
+            "manufacturer",
+            "name",
+            "serial",
+            "self_identity",
+        }
+        properties = b" ".join(
             self.pack_property(key, value)
-            for key, value in ((key, getattr(self, key))
-                               for key in default_attrs))
+            for key, value in (
+                (key, getattr(self, key)) for key in default_attrs
+            )
+        )
 
-        properties += b' ' + self.pack_property(
-            'backend_domain', self.backend_domain.name)
+        properties += b" " + self.pack_property(
+            "backend_domain", self.backend_domain.name
+        )
 
         if self.attachment:
-            properties = self.pack_property(
-                'attachment', self.attachment.name)
+            properties = self.pack_property("attachment", self.attachment.name)
 
-        properties += b' ' + self.pack_property(
-            'interfaces',
-            ''.join(repr(ifc) for ifc in self.interfaces))
+        properties += b" " + self.pack_property(
+            "interfaces", "".join(repr(ifc) for ifc in self.interfaces)
+        )
 
         if self.parent_device is not None:
-            properties += b' ' + self.pack_property(
-                'parent_ident', self.parent_device.ident)
-            properties += b' ' + self.pack_property(
-                'parent_devclass', self.parent_device.devclass)
+            properties += b" " + self.pack_property(
+                "parent_ident", self.parent_device.ident
+            )
+            properties += b" " + self.pack_property(
+                "parent_devclass", self.parent_device.devclass
+            )
 
         for key, value in self.data.items():
-            properties += b' ' + self.pack_property("_" + key, value)
+            properties += b" " + self.pack_property("_" + key, value)
 
         return properties
 
     @classmethod
     def deserialize(
-            cls,
-            serialization: bytes,
-            expected_backend_domain: QubesVM,
-            expected_devclass: Optional[str] = None,
-    ) -> 'DeviceInfo':
+        cls,
+        serialization: bytes,
+        expected_backend_domain: QubesVM,
+        expected_devclass: Optional[str] = None,
+    ) -> "DeviceInfo":
         """
         Recovers a serialized object, see: :py:meth:`serialize`.
         """
-        ident, _, rest = serialization.partition(b' ')
-        ident = ident.decode('ascii', errors='ignore')
+        ident, _, rest = serialization.partition(b" ")
+        ident = ident.decode("ascii", errors="ignore")
         device = UnknownDevice(
             backend_domain=expected_backend_domain,
             ident=ident,
@@ -661,10 +725,8 @@ class DeviceInfo(Device):
 
     @classmethod
     def _deserialize(
-            cls,
-            untrusted_serialization: bytes,
-            expected_device: Device
-    ) -> 'DeviceInfo':
+        cls, untrusted_serialization: bytes, expected_device: Device
+    ) -> "DeviceInfo":
         """
         Actually deserializes the object.
         """
@@ -673,34 +735,39 @@ class DeviceInfo(Device):
 
         cls.check_device_properties(expected_device, properties)
 
-        if 'attachment' not in properties or not properties['attachment']:
-            properties['attachment'] = None
+        if "attachment" not in properties or not properties["attachment"]:
+            properties["attachment"] = None
         else:
             app = expected_device.backend_domain.app
-            properties['attachment'] = app.domains.get_blind(
-                properties['attachment'])
+            properties["attachment"] = app.domains.get_blind(
+                properties["attachment"]
+            )
 
-        if (expected_device.devclass_is_set
-                and properties['devclass'] != expected_device.devclass):
+        if (
+            expected_device.devclass_is_set
+            and properties["devclass"] != expected_device.devclass
+        ):
             raise UnexpectedDeviceProperty(
                 f"Got {properties['devclass']} device "
-                f"when expected {expected_device.devclass}.")
-
-        if 'interfaces' in properties:
-            interfaces = properties['interfaces']
-            interfaces = [
-                DeviceInterface(interfaces[i:i + 7])
-                for i in range(0, len(interfaces), 7)]
-            properties['interfaces'] = interfaces
-
-        if 'parent_ident' in properties:
-            properties['parent'] = Device(
-                backend_domain=expected_device.backend_domain,
-                ident=properties['parent_ident'],
-                devclass=properties['parent_devclass'],
+                f"when expected {expected_device.devclass}."
             )
-            del properties['parent_ident']
-            del properties['parent_devclass']
+
+        if "interfaces" in properties:
+            interfaces = properties["interfaces"]
+            interfaces = [
+                DeviceInterface(interfaces[i : i + 7])
+                for i in range(0, len(interfaces), 7)
+            ]
+            properties["interfaces"] = interfaces
+
+        if "parent_ident" in properties:
+            properties["parent"] = Device(
+                backend_domain=expected_device.backend_domain,
+                ident=properties["parent_ident"],
+                devclass=properties["parent_devclass"],
+            )
+            del properties["parent_ident"]
+            del properties["parent_devclass"]
 
         return cls(**properties)
 
@@ -740,10 +807,10 @@ def deserialize_str(value: str):
 
 
 def sanitize_str(
-        untrusted_value: str,
-        allowed_chars: set,
-        replace_char: str = None,
-        error_message: str = ""
+    untrusted_value: str,
+    allowed_chars: set,
+    replace_char: str = None,
+    error_message: str = "",
 ) -> str:
     """
     Sanitize given untrusted string.
@@ -774,7 +841,7 @@ class UnknownDevice(DeviceInfo):
 
 
 class DeviceAssignment(Device):
-    """ Maps a device to a frontend_domain.
+    """Maps a device to a frontend_domain.
 
     There are 3 flags `attached`, `automatically_attached` and `required`.
     The meaning of valid combinations is as follows:
@@ -793,9 +860,17 @@ class DeviceAssignment(Device):
                                and required to start domain.
     """
 
-    def __init__(self, backend_domain, ident, *, options=None,
-                 frontend_domain=None, devclass=None,
-                 required=False, attach_automatically=False):
+    def __init__(
+        self,
+        backend_domain,
+        ident,
+        *,
+        options=None,
+        frontend_domain=None,
+        devclass=None,
+        required=False,
+        attach_automatically=False,
+    ):
         super().__init__(backend_domain, ident, devclass)
         self.__options = options or {}
         if required:
@@ -821,7 +896,7 @@ class DeviceAssignment(Device):
         return self.__class__(**attr)
 
     @classmethod
-    def from_device(cls, device: Device, **kwargs) -> 'DeviceAssignment':
+    def from_device(cls, device: Device, **kwargs) -> "DeviceAssignment":
         """
         Get assignment of the device.
         """
@@ -829,7 +904,7 @@ class DeviceAssignment(Device):
             backend_domain=device.backend_domain,
             ident=device.ident,
             devclass=device.devclass,
-            **kwargs
+            **kwargs,
         )
 
     @property
@@ -839,14 +914,12 @@ class DeviceAssignment(Device):
 
     @property
     def frontend_domain(self) -> Optional[QubesVM]:
-        """ Which domain the device is attached/assigned to. """
+        """Which domain the device is attached/assigned to."""
         return self.__frontend_domain
 
     @frontend_domain.setter
-    def frontend_domain(
-        self, frontend_domain: Optional[Union[str, QubesVM]]
-    ):
-        """ Which domain the device is attached/assigned to. """
+    def frontend_domain(self, frontend_domain: Optional[Union[str, QubesVM]]):
+        """Which domain the device is attached/assigned to."""
         if isinstance(frontend_domain, str):
             frontend_domain = self.backend_domain.app.domains[frontend_domain]
         self.__frontend_domain = frontend_domain
@@ -886,45 +959,51 @@ class DeviceAssignment(Device):
 
     @property
     def options(self) -> Dict[str, Any]:
-        """ Device options (same as in the legacy API). """
+        """Device options (same as in the legacy API)."""
         return self.__options
 
     @options.setter
     def options(self, options: Optional[Dict[str, Any]]):
-        """ Device options (same as in the legacy API). """
+        """Device options (same as in the legacy API)."""
         self.__options = options or {}
 
     def serialize(self) -> bytes:
         """
         Serialize an object to be transmitted via Qubes API.
         """
-        properties = b' '.join(
+        properties = b" ".join(
             self.pack_property(key, value)
             for key, value in (
-                ('required', 'yes' if self.required else 'no'),
-                ('attach_automatically',
-                 'yes' if self.attach_automatically else 'no'),
-                ('ident', self.ident),
-                ('devclass', self.devclass)))
+                ("required", "yes" if self.required else "no"),
+                (
+                    "attach_automatically",
+                    "yes" if self.attach_automatically else "no",
+                ),
+                ("ident", self.ident),
+                ("devclass", self.devclass),
+            )
+        )
 
-        properties += b' ' + self.pack_property(
-            'backend_domain', self.backend_domain.name)
+        properties += b" " + self.pack_property(
+            "backend_domain", self.backend_domain.name
+        )
 
         if self.frontend_domain is not None:
-            properties += b' ' + self.pack_property(
-                'frontend_domain', self.frontend_domain.name)
+            properties += b" " + self.pack_property(
+                "frontend_domain", self.frontend_domain.name
+            )
 
         for key, value in self.options.items():
-            properties += b' ' + self.pack_property("_" + key, value)
+            properties += b" " + self.pack_property("_" + key, value)
 
         return properties
 
     @classmethod
     def deserialize(
-            cls,
-            serialization: bytes,
-            expected_device: Device,
-    ) -> 'DeviceAssignment':
+        cls,
+        serialization: bytes,
+        expected_device: Device,
+    ) -> "DeviceAssignment":
         """
         Recovers a serialized object, see: :py:meth:`serialize`.
         """
@@ -936,20 +1015,21 @@ class DeviceAssignment(Device):
 
     @classmethod
     def _deserialize(
-            cls,
-            untrusted_serialization: bytes,
-            expected_device: Device,
-    ) -> 'DeviceAssignment':
+        cls,
+        untrusted_serialization: bytes,
+        expected_device: Device,
+    ) -> "DeviceAssignment":
         """
         Actually deserializes the object.
         """
         properties, options = cls.unpack_properties(untrusted_serialization)
-        properties['options'] = options
+        properties["options"] = options
 
         cls.check_device_properties(expected_device, properties)
 
-        properties['attach_automatically'] = qbool(
-            properties.get('attach_automatically', 'no'))
-        properties['required'] = qbool(properties.get('required', 'no'))
+        properties["attach_automatically"] = qbool(
+            properties.get("attach_automatically", "no")
+        )
+        properties["required"] = qbool(properties.get("required", "no"))
 
         return cls(**properties)

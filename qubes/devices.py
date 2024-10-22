@@ -63,8 +63,12 @@ from typing import Iterable
 
 import qubes.exc
 import qubes.utils
-from qubes.device_protocol import (Device, DeviceInfo, UnknownDevice,
-                                   DeviceAssignment)
+from qubes.device_protocol import (
+    Device,
+    DeviceInfo,
+    UnknownDevice,
+    DeviceAssignment,
+)
 
 
 class DeviceNotAssigned(qubes.exc.QubesException, KeyError):
@@ -186,7 +190,8 @@ class DeviceCollection:
         self._set = AssignedCollection()
 
         self.devclass = qubes.utils.get_entry_point_one(
-            'qubes.devices', self._bus)
+            "qubes.devices", self._bus
+        )
 
     async def attach(self, assignment: DeviceAssignment):
         """
@@ -197,27 +202,37 @@ class DeviceCollection:
             assignment.devclass = self._bus
         elif assignment.devclass != self._bus:
             raise ValueError(
-                f'Trying to attach {assignment.devclass} device '
-                f'when {self._bus} device expected.')
+                f"Trying to attach {assignment.devclass} device "
+                f"when {self._bus} device expected."
+            )
 
         if self._vm.is_halted():
             raise qubes.exc.QubesVMNotRunningError(
-                self._vm,"VM not running, cannot attach device,"
-                " do you mean `assign`?")
+                self._vm,
+                "VM not running, cannot attach device,"
+                " do you mean `assign`?",
+            )
 
         device = assignment.device
         if device in self.get_attached_devices():
             raise DeviceAlreadyAttached(
-                'device {!s} of class {} already attached to {!s}'.format(
-                    device, self._bus, self._vm))
+                "device {!s} of class {} already attached to {!s}".format(
+                    device, self._bus, self._vm
+                )
+            )
 
         await self._vm.fire_event_async(
-            'device-pre-attach:' + self._bus,
-            pre_event=True, device=device, options=assignment.options)
+            "device-pre-attach:" + self._bus,
+            pre_event=True,
+            device=device,
+            options=assignment.options,
+        )
 
         await self._vm.fire_event_async(
-            'device-attach:' + self._bus,
-            device=device, options=assignment.options)
+            "device-attach:" + self._bus,
+            device=device,
+            options=assignment.options,
+        )
 
     async def assign(self, assignment: DeviceAssignment):
         """
@@ -227,20 +242,25 @@ class DeviceCollection:
             assignment.devclass = self._bus
         elif assignment.devclass != self._bus:
             raise ValueError(
-                f'Trying to attach {assignment.devclass} device '
-                f'when {self._bus} device expected.')
+                f"Trying to attach {assignment.devclass} device "
+                f"when {self._bus} device expected."
+            )
 
         device = assignment.device
         if device in self.get_assigned_devices():
             raise DeviceAlreadyAssigned(
-                'device {!s} of class {} already assigned to {!s}'.format(
-                    device, self._bus, self._vm))
+                "device {!s} of class {} already assigned to {!s}".format(
+                    device, self._bus, self._vm
+                )
+            )
 
         self._set.add(assignment)
 
         await self._vm.fire_event_async(
-            'device-assign:' + self._bus,
-            device=device, options=assignment.options)
+            "device-assign:" + self._bus,
+            device=device,
+            options=assignment.options,
+        )
 
     def load_assignment(self, device_assignment: DeviceAssignment):
         """Load DeviceAssignment retrieved from qubes.xml
@@ -264,14 +284,13 @@ class DeviceCollection:
         """
         if self._vm.is_halted():
             raise qubes.exc.QubesVMNotStartedError(
-                self._vm,
-                'VM must be running to modify device assignment'
+                self._vm, "VM must be running to modify device assignment"
             )
-        assignments = [a for a in self.get_assigned_devices()
-                       if a == device]
+        assignments = [a for a in self.get_assigned_devices() if a == device]
         if not assignments:
             raise qubes.exc.QubesValueError(
-                f'Device {device} not assigned to {self._vm.name}')
+                f"Device {device} not assigned to {self._vm.name}"
+            )
         assert len(assignments) == 1
         assignment = assignments[0]
 
@@ -282,7 +301,8 @@ class DeviceCollection:
 
         assignment.required = required
         await self._vm.fire_event_async(
-            'device-assignment-changed:' + self._bus, device=device)
+            "device-assignment-changed:" + self._bus, device=device
+        )
 
     async def detach(self, device: Device):
         """
@@ -295,22 +315,26 @@ class DeviceCollection:
                 break
         else:
             raise DeviceNotAssigned(
-                f'device {device.ident!s} of class {self._bus} not '
-                f'attached to {self._vm!s}')
+                f"device {device.ident!s} of class {self._bus} not "
+                f"attached to {self._vm!s}"
+            )
 
         if assignment.required and not self._vm.is_halted():
             raise qubes.exc.QubesVMNotHaltedError(
                 self._vm,
                 "Can not detach a required device from a non halted qube. "
-                "You need to unassign device first.")
+                "You need to unassign device first.",
+            )
 
         # use the local object
         device = assignment.device
         await self._vm.fire_event_async(
-            'device-pre-detach:' + self._bus, pre_event=True, device=device)
+            "device-pre-detach:" + self._bus, pre_event=True, device=device
+        )
 
         await self._vm.fire_event_async(
-            'device-detach:' + self._bus, device=device)
+            "device-detach:" + self._bus, device=device
+        )
 
     async def unassign(self, device_assignment: DeviceAssignment):
         """
@@ -323,27 +347,30 @@ class DeviceCollection:
                 break
         else:
             raise DeviceNotAssigned(
-                f'device {device_assignment.ident!s} of class {self._bus} not '
-                f'assigned to {self._vm!s}')
+                f"device {device_assignment.ident!s} of class {self._bus} not "
+                f"assigned to {self._vm!s}"
+            )
 
         self._set.discard(assignment)
 
         device = device_assignment.device
         await self._vm.fire_event_async(
-            'device-unassign:' + self._bus, device=device)
+            "device-unassign:" + self._bus, device=device
+        )
 
     def get_dedicated_devices(self) -> Iterable[DeviceAssignment]:
         """
         List devices which are attached or assigned to this vm.
         """
         yield from itertools.chain(
-            self.get_attached_devices(), self.get_assigned_devices())
+            self.get_attached_devices(), self.get_assigned_devices()
+        )
 
     def get_attached_devices(self) -> Iterable[DeviceAssignment]:
         """
         List devices which are attached to this vm.
         """
-        attached = self._vm.fire_event('device-list-attached:' + self._bus)
+        attached = self._vm.fire_event("device-list-attached:" + self._bus)
         for dev, options in attached:
             for assignment in self._set:
                 if dev == assignment:
@@ -361,7 +388,7 @@ class DeviceCollection:
                 )
 
     def get_assigned_devices(
-            self, required_only: bool = False
+        self, required_only: bool = False
     ) -> Iterable[DeviceAssignment]:
         """
         Devices assigned to this vm (included in :file:`qubes.xml`).
@@ -377,12 +404,12 @@ class DeviceCollection:
         """
         List devices exposed by this vm.
         """
-        yield from self._vm.fire_event('device-list:' + self._bus)
+        yield from self._vm.fire_event("device-list:" + self._bus)
 
     __iter__ = get_exposed_devices
 
     def __getitem__(self, ident):
-        '''Get device object with given ident.
+        """Get device object with given ident.
 
         :returns: py:class:`DeviceInfo`
 
@@ -393,8 +420,8 @@ class DeviceCollection:
 
         :raises AssertionError: when multiple devices with the same ident are
         found
-        '''
-        dev = self._vm.fire_event('device-get:' + self._bus, ident=ident)
+        """
+        dev = self._vm.fire_event("device-get:" + self._bus, ident=ident)
         if dev:
             assert len(dev) == 1
             return dev[0]
@@ -427,7 +454,7 @@ class AssignedCollection:
         self._dict = {}
 
     def add(self, assignment: DeviceAssignment):
-        """ Add assignment to collection """
+        """Add assignment to collection"""
         assert assignment.attach_automatically
         vm = assignment.backend_domain
         ident = assignment.ident

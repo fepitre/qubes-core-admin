@@ -1,3 +1,16 @@
+include:
+- file: /common.yml
+  project: QubesOS/qubes-continuous-integration
+- file: /r4.3/gitlab-base.yml
+  project: QubesOS/qubes-continuous-integration
+- file: /r4.3/gitlab-host.yml
+  project: QubesOS/qubes-continuous-integration
+
+checks:black:
+  extends: .lint
+  variables:
+    DIR: qubes
+
 checks:pylint:
   before_script:
   - sudo dnf install -y python3-pip
@@ -6,6 +19,7 @@ checks:pylint:
   script:
   - PYTHONPATH=test-packages:~/qubes-core-qrexec python3 -m pylint qubes
   stage: checks
+
 checks:tests:
   after_script:
   - ci/codecov-wrapper -F unittests
@@ -37,8 +51,4 @@ checks:tests:
   stage: checks
   tags:
   - vm-kvm
-include:
-- file: /r4.3/gitlab-base.yml
-  project: QubesOS/qubes-continuous-integration
-- file: /r4.3/gitlab-host.yml
-  project: QubesOS/qubes-continuous-integration
+

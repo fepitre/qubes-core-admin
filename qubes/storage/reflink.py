@@ -138,6 +138,10 @@ class ReflinkPool(qubes.storage.Pool):
     def size(self):
         return self.usage_details.get('data_size')
 
+    @size.setter
+    def size(self, size):
+        super().size(size)
+
     @property
     def usage(self):
         return self.usage_details.get('data_usage')
@@ -388,6 +392,10 @@ class ReflinkVolume(qubes.storage.Volume):
             with suppress(FileNotFoundError):
                 return os.path.getsize(path)
         return self._size
+
+    @size.setter
+    def size(self, size):
+        super().size(size)
 
     @property
     def usage(self):

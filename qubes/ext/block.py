@@ -34,6 +34,7 @@ import qubes.devices
 import qubes.ext
 from qubes.ext import utils
 from qubes.storage import Storage
+from qubes.vm.qubesvm import QubesVM
 
 name_re = re.compile(r"\A[a-z0-9-]{1,12}\Z")
 device_re = re.compile(r"\A[a-z0-9/-]{1,64}\Z")
@@ -194,7 +195,7 @@ class BlockDevice(qubes.device_protocol.DeviceInfo):
         return self._parent
 
     @property
-    def attachment(self) -> Optional['qubes.vm.BaseVM']:
+    def attachment(self) -> Optional[QubesVM]:
         """
         Warning: this property is time-consuming, do not run in loop!
         """

@@ -32,6 +32,8 @@ import time
 from datetime import datetime
 
 import asyncio
+from typing import Dict, Tuple, Union
+
 import lxml.etree
 import importlib.metadata
 import qubes
@@ -954,10 +956,12 @@ class Pool:
     @property
     def size(self):
         ''' Storage pool size in bytes, or None if unknown '''
+        return
 
     @property
     def usage(self):
         ''' Space used in the pool in bytes, or None if unknown '''
+        return
 
     @property
     def usage_details(self):
@@ -1061,7 +1065,7 @@ class VmCreationManager:
 # pylint: disable=too-few-public-methods
 class DirectoryThinPool:
     '''The thin pool containing the device of given filesystem'''
-    _thin_pool = {}
+    _thin_pool: Dict[str, Tuple[Union[str, None], Union[str, None]]] = {}
 
     @classmethod
     def _init(cls, dir_path):

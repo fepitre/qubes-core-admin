@@ -40,7 +40,7 @@ import qubes.utils
 
 from qubes.exc import ProtocolError
 
-QubesVM = 'qubes.vm.BaseVM'
+from qubes.vm.qubesvm import QubesVM
 
 
 class UnexpectedDeviceProperty(qubes.exc.QubesException, ValueError):
@@ -80,8 +80,8 @@ class DeviceSerializer:
         ut_decoded = untrusted_serialization.decode(
             'ascii', errors='strict').strip()
 
-        properties = {}
-        options = {}
+        properties: Dict[str, str] = {}
+        options: Dict[str, str] = {}
 
         if not ut_decoded:
             return properties, options
@@ -1002,13 +1002,13 @@ class DeviceInfo(VirtualDevice):
             domains=None, backend=expected_backend_domain)
 
         try:
-            device = cls._deserialize(rest, device)
-            # pylint: disable=broad-exception-caught
+            device = cls._deserialize(rest, u_device)
+            return device
+        # pylint: disable=broad-exception-caught
         except Exception as exc:
             print(str(exc), file=sys.stderr)
             device = UnknownDevice.from_device(device)
 
-        return device
 
     @classmethod
     def _deserialize(
@@ -1251,7 +1251,7 @@ class DeviceAssignment:
 
     @frontend_domain.setter
     def frontend_domain(
-        self, frontend_domain: Optional[Union[str, QubesVM]]
+        self, frontend_domain: Optional[Union[QubesVM]]
     ):
         """ Which domain the device is attached/assigned to. """
         if isinstance(frontend_domain, str):

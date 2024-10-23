@@ -63,6 +63,7 @@ MEM_OVERHEAD_PER_VCPU = 3 * 1024 * 1024 / 2
 
 _vm_uuid_re = re.compile(rb"\A/vm/[0-9a-f]{8}(?:-[0-9a-f]{4}){4}[0-9a-f]{8}\Z")
 
+
 def _setter_kernel(self, prop, value):
     """ Helper for setting the domain kernel and running sanity checks on it.
     """  # pylint: disable=unused-argument

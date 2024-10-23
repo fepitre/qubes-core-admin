@@ -32,6 +32,7 @@ import lxml.etree
 import qubes.device_protocol
 import qubes.devices
 import qubes.ext
+import qubes.vm.qubesvm
 from qubes.ext.utils import device_list_change
 from qubes.storage import Storage
 

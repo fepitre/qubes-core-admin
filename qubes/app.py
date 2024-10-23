@@ -39,6 +39,8 @@ import jinja2
 import libvirt
 import lxml.etree
 
+
+
 try:
     import xen.lowlevel.xs  # pylint: disable=wrong-import-order
     import xen.lowlevel.xc  # pylint: disable=wrong-import-order
@@ -503,7 +505,7 @@ class VMCollection:
     def add(self, value, _enable_events=True):
         """Add VM to collection
 
-        :param qubes.vm.LocalVM value: VM to add
+        :param qubes.vm.BaseVM value: VM to add
         :param _enable_events:
         :raises TypeError: when value is of wrong type
         :raises ValueError: when there is already VM which has equal ``qid``
@@ -511,7 +513,7 @@ class VMCollection:
 
         # this violates duck typing, but is needed
         # for VMProperty to function correctly
-        if not isinstance(value, qubes.vm.LocalVM):
+        if not isinstance(value, qubes.vm.BaseVM):
             raise TypeError(
                 "{} holds only LocalVM instances".format(
                     self.__class__.__name__
@@ -545,7 +547,7 @@ class VMCollection:
                     return vm
             raise KeyError(key)
 
-        if isinstance(key, qubes.vm.LocalVM):
+        if isinstance(key, qubes.vm.BaseVM):
             key = key.uuid
 
         if isinstance(key, uuid.UUID):
@@ -562,7 +564,8 @@ class VMCollection:
         if not vm.is_halted():
             raise qubes.exc.QubesVMNotHaltedError(vm)
         self.app.fire_event("domain-pre-delete", pre_event=True, vm=vm)
-        vm.libvirt_undefine()
+        if isinstance(vm, qubes.vm.qubesvm.QubesVM):
+            vm.libvirt_undefine()
         del self._dict[vm.qid]
         self.app.fire_event("domain-delete", vm=vm)
         if getattr(vm, "dispid", None):
@@ -1655,7 +1658,7 @@ class Qubes(qubes.PropertyHolder):
                             "details".format(vm.name),
                         )
 
-        assignments = vm.get_provided_assignments()
+        assignments = vm.get_provided_assignments() if isinstance(vm, qubes.vm.qubesvm.QubesVM) else []
         if assignments:
             desc = ", ".join(assignment.ident for assignment in assignments)
             raise qubes.exc.QubesVMInUseError(

@@ -222,7 +222,7 @@ class PCIDevice(qubes.device_protocol.DeviceInfo):
 
         Every device should have at least one interface.
         """
-        if self._interfaces is None:
+        if self._interfaces is None and self.backend_domain:
             if self.backend_domain.app.vmm.offline_mode:
                 # don't cache this value
                 return [qubes.device_protocol.DeviceInterface(
@@ -235,7 +235,7 @@ class PCIDevice(qubes.device_protocol.DeviceInfo):
                 hostdev_details.XMLDesc()))
             self._interfaces = [qubes.device_protocol.DeviceInterface(
                 interface_encoding, devclass='pci')]
-        return self._interfaces
+        return self._interfaces or []
 
     @property
     def parent_device(self) -> Optional[qubes.device_protocol.DeviceInfo]:
@@ -291,7 +291,10 @@ class PCIDevice(qubes.device_protocol.DeviceInfo):
                   "manufacturer": unknown,
                   "name": unknown,
                   "serial": unknown}
-        if (not self.backend_domain.is_running()
+
+        if (
+            not self.backend_domain
+            or not self.backend_domain.is_running()
             or self.backend_domain.app.vmm.offline_mode
         ):
             # don't cache these values

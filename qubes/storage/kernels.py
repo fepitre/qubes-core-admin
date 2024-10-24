@@ -89,8 +89,9 @@ class LinuxModules(Volume):
         if isinstance(src_volume, LinuxModules):
             # do nothing
             return self
-        raise StoragePoolException('clone of LinuxModules volume from '
-                                  'different volume type is not supported')
+        raise StoragePoolException(
+            'clone of LinuxModules volume from different volume type is not supported'
+        )
 
     async def create(self):
         return self
@@ -98,6 +99,10 @@ class LinuxModules(Volume):
     @property
     def ephemeral(self):
         return False
+
+    @ephemeral.setter
+    def ephemeral(self, value):
+        super().ephemeral(value)
 
     async def remove(self):
         pass

@@ -23,14 +23,15 @@ import sys
 
 import qubes
 
-from typing import Type
+from typing import Type, Dict, List
 
 from qubes import device_protocol
 from qubes.device_protocol import VirtualDevice
+from qubes.ext.block import BlockDeviceExtension
 
 
 def device_list_change(
-        ext: qubes.ext.Extension, current_devices,
+        ext: BlockDeviceExtension, current_devices,
         vm, path, device_class: Type[qubes.device_protocol.DeviceInfo]
 ):
     devclass = device_class.__name__[:-len('Device')].lower()
@@ -60,7 +61,7 @@ def device_list_change(
 
     ext.devices_cache[vm.name] = current_devices
 
-    to_attach = {}
+    to_attach: Dict[str, Dict] = {}
     for front_vm in vm.app.domains:
         if not front_vm.is_running():
             continue
@@ -151,8 +152,8 @@ async def confirm_device_attachment(device, frontends) -> str:
                       *front_names]),
             stdout=asyncio.subprocess.PIPE
         )
-        (target_name, _) = await proc.communicate()
-        target_name = target_name.decode(encoding='ascii')
+        (b_target_name, _) = await proc.communicate()
+        target_name = b_target_name.decode(encoding='ascii')
         if target_name in front_names:
             return target_name
         return ""

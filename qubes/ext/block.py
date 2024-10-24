@@ -232,7 +232,7 @@ class BlockDevice(qubes.device_protocol.DeviceInfo):
         """
         parent_identity = ''
         p = self.parent_device
-        if p is not None:
+        if p is not None and isinstance(p, qubes.vm.qubesvm.QubesVM):
             p_info = p.backend_domain.devices[p.devclass][p.port_id]
             parent_identity = p_info.device_id
             if p.devclass == 'usb':

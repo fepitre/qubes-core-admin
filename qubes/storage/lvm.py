@@ -345,6 +345,10 @@ class ThinVolume(qubes.storage.Volume):
         except KeyError:
             return self._size
 
+    @size.setter
+    def size(self, size):
+        super().size(size)
+
     async def _reset(self):
         ''' Resets a volatile volume '''
         assert not self.snap_on_start and not self.save_on_stop, \

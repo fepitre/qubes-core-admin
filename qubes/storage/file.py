@@ -566,6 +566,10 @@ class FileVolume(qubes.storage.Volume):
             self._size = os.path.getsize(self.path)
         return self._size
 
+    @size.setter
+    def size(self, size):
+        super().size(size)
+
     @property
     def usage(self):
         ''' Returns the actualy used space '''

@@ -210,9 +210,8 @@ class AdminExtension(qubes.ext.Extension):
 
                     if line:
                         name, *values = line.split()
-
                         values = ' '.join(values).replace(',', ' ').split()
-                        values = {v for v in values if len(v) > 0}
+                        values = [v for v in values if len(v) > 0]
 
                         deny[name] = deny.get(name, set()).union(set(values))
         except IOError:

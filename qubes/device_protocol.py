@@ -165,7 +165,7 @@ class DeviceSerializer:
             expected = Port(
                 expected.backend_domain,
                 expected.port_id,
-                properties.get('devclass', None))
+                properties.get('devclass', ""))
         if properties.get('devclass', expected.devclass) != expected.devclass:
             raise UnexpectedDeviceProperty(
                 f"Got {properties['devclass']} device "
@@ -202,7 +202,7 @@ class DeviceSerializer:
     def sanitize_str(
             untrusted_value: str,
             allowed_chars: set,
-            replace_char: str = None,
+            replace_char: Optional[str] = None,
             error_message: str = ""
     ) -> str:
         """

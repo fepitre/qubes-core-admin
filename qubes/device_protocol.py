@@ -903,6 +903,10 @@ class DeviceInterface:
 class DeviceInfo(VirtualDevice):
     """Holds all information about a device"""
 
+    #: whether this device class may be assigned as required (`--required`).
+    #: Defaults to False; device classes that support it set it to True.
+    required_assignment_allowed = False
+
     def __init__(
         self,
         port: Port,

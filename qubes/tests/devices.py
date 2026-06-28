@@ -38,7 +38,7 @@ import qubes.tests
 
 class TestDevice(DeviceInfo):
     # pylint: disable=too-few-public-methods
-    pass
+    required_assignment_allowed = True
 
 
 class TestVMCollection(dict):

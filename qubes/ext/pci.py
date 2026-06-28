@@ -139,6 +139,7 @@ def _device_desc(hostdev_xml):
 
 class PCIDevice(qubes.device_protocol.DeviceInfo):
     # pylint: disable=too-few-public-methods
+    required_assignment_allowed = True
     regex = re.compile(
         r"\A((?P<segment>[0-9a-f]{4})[_:])?(?P<bus>[0-9a-f]{2})[_:]"
         r"(?P<device>[0-9a-f]{2})\.(?P<function>[0-9a-f])\Z"

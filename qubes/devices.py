@@ -254,6 +254,13 @@ class DeviceCollection:
         if not assignment.attach_automatically:
             raise ValueError("Only auto-attachable devices can be assigned.")
 
+        if assignment.required and not getattr(
+            self.devclass, "required_assignment_allowed", False
+        ):
+            raise qubes.exc.QubesValueError(
+                f"{self._bus} devices cannot be assigned as required."
+            )
+
         self._set.add(assignment)
 
         await self._vm.fire_event_async(
